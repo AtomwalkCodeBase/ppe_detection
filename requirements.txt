@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+
+sqlalchemy
+
+opencv-python-headless
+numpy
+
+ultralytics
+torch
+
+boto3
+botocore
+
+requests
+
+python-multipart
