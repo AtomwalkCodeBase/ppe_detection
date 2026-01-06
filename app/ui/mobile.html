@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LabGuard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body style="font-family: Arial, sans-serif; text-align: center; padding: 30px;">
+
+  <h2>LabGuard</h2>
+
+  <button
+    id="enterBtn"
+    onclick="enterLab()"
+    style="padding:12px 24px;font-size:16px;border-radius:6px;cursor:pointer;"
+  >
+    Enter Lab
+  </button>
+
+  <h3 id="status" style="margin-top:30px;"></h3>
+  <p id="time" style="color:#555;"></p>
+
+  <img
+    id="proofImage"
+    style="width:100%;max-width:420px;margin-top:20px;display:none;border-radius:8px;border:1px solid #ddd;"
+    alt="PPE Proof"
+  />
+
+<script>
+let entryId = null;
+let poller = null;
+
+async function enterLab() {
+  document.getElementById("status").innerText = "PROCESSING...";
+  document.getElementById("time").innerText = "";
+  document.getElementById("proofImage").style.display = "none";
+  document.getElementById("enterBtn").disabled = true;
+
+  try {
+    const res = await fetch("/lms/trigger-entry?lab_id=LAB-01", {
+      method: "POST"
+    });
+
+    const data = await res.json();
+    entryId = data.entry_id;
+
+    poller = setInterval(fetchResult, 2000);
+
+  } catch (err) {
+    document.getElementById("status").innerText = "ERROR triggering entry";
+    document.getElementById("enterBtn").disabled = false;
+  }
+}
+
+async function fetchResult() {
+  if (!entryId) return;
+
+  const res = await fetch(`/lms/entry-result/${entryId}`);
+  const data = await res.json();
+
+  if (data.status !== "DONE") {
+    document.getElementById("status").innerText = "PROCESSING...";
+    return;
+  }
+
+  clearInterval(poller);
+
+  document.getElementById("status").innerText =
+    `RESULT: ${data.overall}`;
+
+  document.getElementById("time").innerText =
+    new Date(data.created_at).toLocaleString();
+
+  if (data.image_url) {
+    const img = document.getElementById("proofImage");
+    img.src = data.image_url;
+    img.style.display = "block";
+  }
+
+  document.getElementById("enterBtn").disabled = false;
+}
+</script>
+
+</body>
+</html>
