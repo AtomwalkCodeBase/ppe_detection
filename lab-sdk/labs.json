@@ -1,8 +1,0 @@
-{
-  "LAB-01": [
-    "rtsp://admin:atomwalk%4011@192.168.0.60:554/stream1"
-  ],
-  "LAB-02": [
-    "rtsp://192.168.1.20/stream1"
-  ]
-}
